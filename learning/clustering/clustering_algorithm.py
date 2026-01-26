@@ -249,7 +249,14 @@ def private_lsh_clustering(
   coreset: private_outputs.PrivateWeightedData = get_private_coreset(
       clipped_data, coreset_param, private_count)
 
-  k = min(k, len(coreset.datapoints))
+  # IHYUN: Added prints for prelim diagnosis testing
+  print(f"coreset.weights len = # (our) clusters: {coreset.weights.shape}")
+
+  #############################################################################
+  # IHYUN: Irrelevant to us after this point (including use of k)
+
+  # k = min(k, len(coreset.datapoints))
+  k = len(coreset.datapoints)
   logging.debug(
       "Starting k-means++ computation on private coreset with k=%d. This may "
       "be less than the original if generated coreset data ended up with "
@@ -260,6 +267,10 @@ def private_lsh_clustering(
   # Calculate the result relative to the original data.
   # Note: the calculations besides the centers are nonprivate.
   return ClusteringResult(data, kmeans.cluster_centers_)
+  
+  # IHYUN: compute accuracy of core-sets (i.e., our clusters)
+  # IHYUN: NOTE: no ground truth in real life data
+  # return ClusteringResult(data, )
 
 
 def get_private_coreset(

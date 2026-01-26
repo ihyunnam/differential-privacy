@@ -46,8 +46,8 @@ def sample_uniform_sphere(num_points: int,
 
 
 def generate_synthetic_dataset(
-    num_points: int = 1000000,
-    dim: int = 100,
+    num_points: int = 1000000,  # 25k for us
+    dim: int = 100, # 781? for us
     num_clusters: int = 64,
     cluster_ratio: float = 100.0,
     radius: float = 1.0) -> clustering_params.Data:

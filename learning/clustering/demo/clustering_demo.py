@@ -77,11 +77,20 @@ def main(argv: Sequence[str]) -> None:
   def run_clustering(k: int, eps: float) -> None:
     privacy_param = clustering_params.DifferentialPrivacyParam(
         epsilon=eps, delta=1e-6)
+    tree_param = clustering_params.TreeParam(
+        # min_num_points_in_branching_node=4,
+        # min_num_points_in_node=2,
+        # max_depth=5,
+        min_num_points_in_branching_node=500,
+        min_num_points_in_node=100,
+        max_depth=20,
+    )
     clustering_result: clustering_algorithm.ClusteringResult = (
         clustering_algorithm.private_lsh_clustering(
             k,
             data,
-            privacy_param))
+            privacy_param,
+            tree_param=tree_param,))
     clustering_metrics: clustering_algorithm.ClusteringMetrics = (
         clustering_result.get_clustering_metrics())
     correct_pred = clustering_metrics.dominant_label_correct_count
