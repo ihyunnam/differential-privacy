@@ -45,8 +45,7 @@ _FIXED_K = flags.DEFINE_integer(
 #     'epsilon_to_try', '0.1, 0.5, 1.0, 1.5, 2.0',
 #     'List of epsilon values to use when experimenting with varying epsilon.')
 _MAX_DEPTH = flags.DEFINE_list(
-    # 'max_depth', '2,4,6,8, 10, 12, 14, 16',
-    'max_depth', '2,4,6,8',
+    'max_depth', '2,4,6,8,10,12,14,16,18,20',
     'Value of max_depth when experimenting with varying epsilon.')
 _MIN_NUM_POINTS_IN_BRANCHING_NODE = flags.DEFINE_list(
     'min_num_points_in_branching_node', '20, 40, 60, 80, 100, 200, 300',
@@ -76,14 +75,14 @@ def prep_data() -> clustering_params.Data:
         dtype=np.float32
     )
 
-    data = clustering_params.Data(datapoints, radius)
-    # data_clipped = data.clip_by_radius()
+    data = clustering_params.Data(datapoints, radius)  # This returns type Data
+    # data_clipped = data.clip_by_radius()  # This returns type Points not Data
     
     # SANITY CHECK: max ~= radius 
-    # norms = np.linalg.norm(data_clipped, axis=1)
-    # print(f"norms min: {norms.min()}, norms max: {norms.max()}")
+    norms = np.linalg.norm(data.datapoints, axis=1)
+    print(f"norms min: {norms.min()}, norms max: {norms.max()}")
 
-    return clustering_params.Data(data, radius)
+    return clustering_params.Data(data.datapoints, radius)
 
 eval_head = ('| epsilon | max_depth | actual_depth | min_branch | min_node | cluster_frac | loss |')
 
