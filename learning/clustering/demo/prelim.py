@@ -94,7 +94,9 @@ def run_clustering(min_num_points_in_branching_node: int, min_num_points_in_node
       min_num_points_in_node=min_num_points_in_node,
       max_depth=max_depth)
 
-  # We want to aim for coreset_weight_avg ~ 150 like in URANIA
+  # IHYUN: We want to aim for coreset_weight_avg ~ 150 like in URANIA
+  # IHYUN: min_branch, min_node had marginal impact on coreset_weight_avg.
+  # TODO try larger max_depths so there's more possible clusters?
   cluster_occupancy, actual_depth, coreset_weight_avg, clustering_result = (
       clustering_algorithm.private_lsh_clustering(
           k,
