@@ -27,7 +27,6 @@ from clustering import lsh_tree
 from clustering import privacy_calculator
 from clustering import private_outputs
 
-
 class ClusteringMetrics():
   """Class for computing various clustering quality metrics.
 
@@ -194,7 +193,7 @@ def private_lsh_clustering(
     privacy_param: clustering_params.DifferentialPrivacyParam,
     tree_param: Optional[clustering_params.TreeParam] = None,
     multipliers: Optional[clustering_params.PrivacyCalculatorMultiplier] = None,
-    short_description: str = "CoresetParam") -> ClusteringResult:
+    short_description: str = "CoresetParam") -> tuple[float, int, float, ClusteringResult]:
   """Clusters data into k clusters.
 
   Args:
@@ -246,11 +245,11 @@ def private_lsh_clustering(
   clipped_data = clustering_params.Data(data.clip_by_radius(), data.radius,
                                         data.labels)
 
-  coreset: private_outputs.PrivateWeightedData = get_private_coreset(
-      clipped_data, coreset_param, private_count)
+  actual_depth, coreset, coreset_weight_avg = get_private_coreset(clipped_data, coreset_param, private_count)
 
   # IHYUN: Added prints for prelim diagnosis testing
-  print(f"coreset.weights len = # (our) clusters: {coreset.weights.shape}")
+  # print(f"# our clusters: {coreset.weights.shape[0]}")
+  # print(f'actual # clusters / max # clusters: {coreset.weights.shape[0] / 2 ** actual_depth}')
 
   #############################################################################
   # IHYUN: Irrelevant to us after this point (including use of k)
@@ -266,18 +265,17 @@ def private_lsh_clustering(
           coreset.datapoints, sample_weight=coreset.weights)
   # Calculate the result relative to the original data.
   # Note: the calculations besides the centers are nonprivate.
-  return ClusteringResult(data, kmeans.cluster_centers_)
-  
+  return coreset.weights.shape[0] / 2 ** actual_depth, actual_depth, coreset_weight_avg, ClusteringResult(data, kmeans.cluster_centers_)
+
   # IHYUN: compute accuracy of core-sets (i.e., our clusters)
   # IHYUN: NOTE: no ground truth in real life data
   # return ClusteringResult(data, )
-
 
 def get_private_coreset(
     data: clustering_params.Data,
     coreset_param: coreset_params.CoresetParam,
     private_count: Optional[int],
-) -> private_outputs.PrivateWeightedData:
+) -> tuple[int, private_outputs.PrivateWeightedData, float]:
   """Returns private coreset, when clustered it approximates data clustering.
 
   Args:
@@ -294,9 +292,13 @@ def get_private_coreset(
   leaves = lsh_tree.LshTree(root).leaves
   coreset_points = []
   coreset_point_weights = []
+  
   for leaf in leaves:
     coreset_points.append(leaf.private_average)
     coreset_point_weights.append(leaf.private_count)
+  
+  # IHYUN: added to check if this is roughly equal to 150 (URANIA)
+  coreset_point_avg = np.mean(coreset_point_weights)
 
   # To improve accuracy, we can clip the coreset points to the provided radius.
   coreset_points = data.clip_by_radius(np.array(coreset_points))
@@ -304,5 +306,5 @@ def get_private_coreset(
   logging.debug("Finished generating private coreset.")
   logging.debug("The coreset consists of %s points.", len(coreset_points))
   logging.debug("The coreset weights are: %s.", coreset_point_weights)
-  return private_outputs.PrivateWeightedData(
-      np.array(coreset_points), np.array(coreset_point_weights))
+  return max(lsh_tree.LshTree(root).tree.keys()), private_outputs.PrivateWeightedData(
+      np.array(coreset_points), np.array(coreset_point_weights)), coreset_point_avg

@@ -85,7 +85,7 @@ def main(argv: Sequence[str]) -> None:
         min_num_points_in_node=100,
         max_depth=20,
     )
-    clustering_result: clustering_algorithm.ClusteringResult = (
+    _,  _, _, clustering_result: clustering_algorithm.ClusteringResult = (
         clustering_algorithm.private_lsh_clustering(
             k,
             data,

@@ -90,7 +90,7 @@ class ClusteringTest(parameterized.TestCase):
     privacy_param = clustering_params.DifferentialPrivacyParam(np.inf)
     # No branching, the coreset will just be the average of the points
     tree_param = clustering_params.TreeParam(1, 1, 0)
-    clustering_result = clustering_algorithm.private_lsh_clustering(
+    _, _, _, clustering_result = clustering_algorithm.private_lsh_clustering(
         3,
         data,
         privacy_param,
